@@ -4,7 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // json body parsing
-app.use(express.static(path.join(__dirname, '../public')));  // serve the static frontend
+app.use(express.static(path.join(__dirname, '/public')));  // serve the static frontend
 
 // fake API handling the form submission
 app.post('/api/submit-link', (req, res) => {
