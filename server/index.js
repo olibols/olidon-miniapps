@@ -3,15 +3,22 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// serve static built client from react
-app.use(express.static(path.join(__dirname, '../client/build')));
+app.use(express.json()); // json body parsing
+app.use(express.static(path.join(__dirname, '../public')));  // serve the static frontend
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'hello world from express' });
+// fake API handling the form submission
+app.post('/api/submit-link', (req, res) => {
+  const { link } = req.body;
+
+  if (!link) {
+    return res.status(400).json({ error: "no link provided" });
+  }
+
+  // imagine doing something cool with the link...
+  console.log(`got a link: ${link}`);
+
+  // Send back some quasi-successful response
+  res.json({ success: true, message: `link received: ${link}`, processedLink: link.toUpperCase() }); // just manipulating it to fake doing something
 });
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-});
-
-app.listen(PORT, () => console.log(`server running on ${PORT}`));
+app.listen(PORT, () => console.log(`server is now running on port ${PORT}`));
