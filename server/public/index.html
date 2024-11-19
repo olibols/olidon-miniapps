@@ -1,14 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rimworld Helper</title>
+    <title>rimtools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="/main.js"></script>
 </head>
+
 <body>
-    <div class="container">
-        <title>Rimpy modlist generator</title>
-        
+    <div class="all-tools">
+        <div class="rimtool-container">
+            <h1>rimpy modlist merger</h1>
+            <form id="modlist-form">
+                <label for="file1">select the first modlist XML file:</label>
+                <input type="file" id="file1" name="file1" accept=".xml" required><br>
+                <label for="file2">select the second modlist XML file:</label>
+                <input type="file" id="file2" name="file2" accept=".xml" required><br>
+                <button type="submit">merge modlist</button>
+            </form>
+            <p id="message"></p>
+        </div>
+
+        <div class="rimtool-container">
+            <h1>steam to rimpy modlist generator</h1>
+            <h3>disclaimer: this runs off a database of modid to steamurl links. you can help by submitting to </h3>
+            <form id="modlist-generator-form">
+                <label for="steam-workshop-url">paste the steam workshop URL:</label>
+                <input type="text" id="steam-workshop-url" name="steam-workshop-url" required>
+                <div class="checkbox-container">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="include-royalty" name="include-royalty" value="true">
+                        <label for="include-royalty">include royalty DLC</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="include-ideology" name="include-ideology" value="true">
+                        <label for="include-ideology">include ideology DLC</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="include-biotech" name="include-biotech" value="true">
+                        <label for="include-biotech">include biotech DLC</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="include-anomaly" name="include-anomaly" value="true">
+                        <label for="include-anomaly">include anomaly DLC</label>
+                    </div>
+                </div>
+                <button type="submit">generate modlist</button>
+            </form>
+            <div id="result-container" style="display:none;">
+                <h3>Download your ModsConfig.xml</h3>
+                <button id="download-button">Download</button>
+                
+                <div id="unfound-mods-container" style="display:none;">
+                    <h3>The following mods were not found in our database:</h3>
+                    <ul id="unfound-mods-list"></ul>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="footer">
+        <p>rimtools by olidon.dev</p>
+    </div>
+    <script>
+        document.getElementById('modlist-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('file1', document.getElementById('file1').files[0]);
+            formData.append('file2', document.getElementById('file2').files[0]);
+
+            try {
+                const response = await fetch('/api/merge-modlists', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'merged_modlist.xml';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.getElementById('message').textContent = 'Merged modlist downloaded successfully.';
+                } else {
+                    document.getElementById('message').textContent = 'Error merging modlists.';
+                }
+            } catch (error) {
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
 </body>
+
 </html>
